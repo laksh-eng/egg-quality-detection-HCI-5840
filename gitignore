@@ -1,9 +1,0 @@
-# Ignore temporary files
-tmp/
-*.log
-__pycache__/
-*.pyc
-.DS_Store
-
-# Ignore keys and secrets
-keys.py
