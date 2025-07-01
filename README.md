@@ -12,3 +12,10 @@ This project is part of HCI 584 at Iowa State University. It uses computer visio
  Estimates size using a reference object
  Provides a basic GUI for selecting images and viewing results
 
+ ##  Current Progress
+
+Project spec uploaded (PDF)
+Classification code written using KMeans + HSV color space
+4 test egg images added and tested
+Output labels: Good Egg / Bad Egg / Uncertain
+
