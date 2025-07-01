@@ -46,7 +46,7 @@ def estimate_egg_size(image_path):
     print(f"{os.path.basename(image_path)} → Major Axis: {major_axis:.2f}px, Minor Axis: {minor_axis:.2f}px")
     return major_axis, minor_axis
 
-#Test run on all images in test folder 
+#Test running on all images in test folder 
 if __name__ == "__main__":
     test_folder = "test images"
     for file in os.listdir(test_folder):
