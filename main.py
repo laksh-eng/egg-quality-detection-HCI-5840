@@ -14,7 +14,7 @@ def classify_by_kmeans_color(region):
     #Flattens the 2D image into a list of pixels.
     if len(pixels) == 0:
         return "No Egg"
-#Clusters the pixel colors to find the dominant HSV color.
+#Clusters the pixel colors to find the dominant HSV colour.
     kmeans = KMeans(n_clusters=1, random_state=42).fit(pixels)
     #Extracts the center HSV value of that cluster
     h, s, v = kmeans.cluster_centers_[0]
