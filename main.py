@@ -1,103 +1,91 @@
-import os
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-# Egg Classification Logic Using KMeans- Defines a function that takes a part of the image (just the egg) and claasifies it
+# --- Egg classification using KMeans HSV ---
+#This function takes in an image region (ROI) and classifies the egg based on HSV color clustering.
 def classify_by_kmeans_color(region):
-    
-    #Converts the image from normal color (BGR) to HSV (Hue, Saturation, Value), which is better for analyzing color.
+#Converts the input region from BGR (OpenCV’s default) to HSV (Hue, Saturation, Value) which is more effective for color detection.
     hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
-    #Turns the image into a list of pixels, each with H, S, and V values.
     pixels = hsv.reshape((-1, 3))
 
-    #Removes very dark or black pixels (noise or background).
+    # Ignore dark background pixels
     pixels = pixels[np.any(pixels > 15, axis=1)]
-    #If no valid pixels are left, it returns “No Egg”.
+    #Flattens the 2D image into a list of pixels.
     if len(pixels) == 0:
         return "No Egg"
-    
-
-    #Applies KMeans clustering to find the average (main) HSV color in the image.
+#Clusters the pixel colors to find the dominant HSV color.
     kmeans = KMeans(n_clusters=1, random_state=42).fit(pixels)
+    #Extracts the center HSV value of that cluster
     h, s, v = kmeans.cluster_centers_[0]
-#Prints the dominant color values so you can check them.
-    print(f"HSV → H={h:.1f}, S={s:.1f}, V={v:.1f}")
 
-    #Classify based on thresholds
-    if v < 100:
-        return "No Egg"
-    elif s < 30 and v > 185 and 40 < h < 95:
-        return "Good Egg"
-    elif 18 <= h <= 35 and 40 <= s <= 85 and 150 <= v <= 240:
+
+    # Prioritizes "Bad Egg" classification first, then "Good Egg", then "Uncertain".
+    if 17 <= h <= 23 and 75 <= s <= 140 and 105 <= v <= 210:
         return "Bad Egg"
-    elif s < 35 and v > 180:
+    elif 18 <= h <= 35 and 40 <= s <= 90 and 120 <= v <= 255:
         return "Good Egg"
-    elif s > 35:
-        return "Bad Egg"
     else:
         return "Uncertain"
 
-#Detect and Crop Egg Using Otsu + Contour
-    #This function takes a full image and automatically finds the egg.
-def detect_and_crop_egg(image):
-    """
-    Segment egg using thresholding and crop the bounding box.
-    """
-    #Converts image to black & white for easier processing.
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# --- Main Video Processing ---
+def process_video(input_path, output_path):
+    cap = cv2.VideoCapture(input_path)
+    if not cap.isOpened():
+        print("Could not open video.")
+        return
 
-    #Automatically chooses a brightness level to separate background from egg using Otsu’s method.
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
-    #Invert if egg is white (background becomes white by default)
-    if np.mean(gray[thresh == 255]) > np.mean(gray[thresh == 0]):
-        thresh = cv2.bitwise_not(thresh)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
-    #Find contours
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if not contours:
-        return None
+    print(f" Processing video and saving to: {output_path}")
 
-    #Get the largest contour (assumed to be egg)
-    largest = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(largest)
-    return image[y:y+h, x:x+w]
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-# Main Loop to Process Test Images
-def main():
-    input_folder = "test images"
-    output_folder = "classified"
-    os.makedirs(output_folder, exist_ok=True)
+        # Resize frame (optional)
+        resized = cv2.resize(frame, (width, height))
 
-    for file in os.listdir(input_folder):
-        if not file.lower().endswith((".jpg", ".jpeg", ".png")):
-            continue
+        # Fixed ROI 
+        x1, y1, x2, y2 = 180, 200, 460, 400
+        roi = resized[y1:y2, x1:x2]
 
-        img_path = os.path.join(input_folder, file)
-        img = cv2.imread(img_path)
+        label = classify_by_kmeans_color(roi)
 
-        if img is None:
-            print(f"Could not read {file}")
-            continue
+        # Draw ROI bounding box
+        cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(resized, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                    (0, 255, 0) if label == "Good Egg" else (0, 0, 255), 2)
 
-        #Detect and crop the egg
-        cropped = detect_and_crop_egg(img)
-        if cropped is None:
-            print(f"{file} → No egg detected")
-            continue
+        out.write(resized)
+        cv2.imshow("Detection", resized)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-        #Classify cropped region
-        label = classify_by_kmeans_color(cropped)
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+    print("Video saved.")
 
-        #Save result image with overlay text
-        cv2.putText(img, f"{label}", (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        output_path = os.path.join(output_folder, file)
-        cv2.imwrite(output_path, img)
-        print(f"{file} → {label}")
-
+# --- Run the script ---
 if __name__ == "__main__":
-    main()
+    input_video = "egg_test_video.mp4" 
+    output_video = "final_detected_eggs_labeled.mp4"
+    process_video(input_video, output_video)
+
+
+
+
+
+
+
+
 
 
 
