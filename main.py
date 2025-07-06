@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-# --- Egg classification using KMeans HSV ---
+#  Egg classification using KMeans HSV 
 #This function takes in an image region (ROI) and classifies the egg based on HSV color clustering.
 def classify_by_kmeans_color(region):
 #Converts the input region from BGR (OpenCV’s default) to HSV (Hue, Saturation, Value) which is more effective for color detection.
@@ -28,7 +28,7 @@ def classify_by_kmeans_color(region):
     else:
         return "Uncertain"
 
-# --- Main Video Processing ---
+# Main Video Processing
 def process_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
@@ -73,7 +73,7 @@ def process_video(input_path, output_path):
     cv2.destroyAllWindows()
     print("Video saved.")
 
-# --- Run the script ---
+# Run the script
 if __name__ == "__main__":
     input_video = "egg_test_video.mp4" 
     output_video = "final_detected_eggs_labeled.mp4"
