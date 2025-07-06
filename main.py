@@ -1,91 +1,54 @@
 import cv2
 import numpy as np
+import os
 from sklearn.cluster import KMeans
 
-# --- Egg classification using KMeans HSV ---
-#This function takes in an image region (ROI) and classifies the egg based on HSV color clustering.
 def classify_by_kmeans_color(region):
-#Converts the input region from BGR (OpenCV’s default) to HSV (Hue, Saturation, Value) which is more effective for color detection.
     hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
     pixels = hsv.reshape((-1, 3))
-
-    # Ignore dark background pixels
     pixels = pixels[np.any(pixels > 15, axis=1)]
-    #Flattens the 2D image into a list of pixels.
+
     if len(pixels) == 0:
         return "No Egg"
-#Clusters the pixel colors to find the dominant HSV colour.
+
     kmeans = KMeans(n_clusters=1, random_state=42).fit(pixels)
-    #Extracts the center HSV value of that cluster
     h, s, v = kmeans.cluster_centers_[0]
+    print(f"HSV → H={h:.1f}, S={s:.1f}, V={v:.1f}")
 
-
-    # Prioritizes "Bad Egg" classification first, then "Good Egg", then "Uncertain".
-    if 17 <= h <= 23 and 75 <= s <= 140 and 105 <= v <= 210:
-        return "Bad Egg"
-    elif 18 <= h <= 35 and 40 <= s <= 90 and 120 <= v <= 255:
+    if s < 30 and v > 150 and 0 < h < 60:
         return "Good Egg"
+    elif 18 <= h <= 35 and 40 <= s <= 85 and 140 <= v <= 255:
+        return "Bad Egg"
     else:
         return "Uncertain"
 
-# --- Main Video Processing ---
-def process_video(input_path, output_path):
-    cap = cv2.VideoCapture(input_path)
-    if not cap.isOpened():
-        print("Could not open video.")
-        return
+def main():
+    input_folder = "test images"
+    output_folder = "annotated"
 
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = cap.get(cv2.CAP_PROP_FPS)
+    os.makedirs(output_folder, exist_ok=True)
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    for file in os.listdir(input_folder):
+        if file.lower().endswith(('.jpg', '.jpeg', '.png')):
+            path = os.path.join(input_folder, file)
+            img = cv2.imread(path)
 
-    print(f" Processing video and saving to: {output_path}")
+            if img is None:
+                print(f"Could not read {file}")
+                continue
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+            h, w = img.shape[:2]
+            crop = img[h//3:h*2//3, w//3:w*2//3]
+            label = classify_by_kmeans_color(crop)
 
-        # Resize frame (optional)
-        resized = cv2.resize(frame, (width, height))
+            
+            cv2.rectangle(img, (w//3, h//3), (w*2//3, h*2//3), (255, 0, 0), 2)
+            cv2.putText(img, label, (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
 
-        # Fixed ROI 
-        x1, y1, x2, y2 = 180, 200, 460, 400
-        roi = resized[y1:y2, x1:x2]
+            output_path = os.path.join(output_folder, file)
+            cv2.imwrite(output_path, img)
+            print(f"{file} → {label}")
 
-        label = classify_by_kmeans_color(roi)
-
-        # Draw ROI bounding box
-        cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(resized, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
-                    (0, 255, 0) if label == "Good Egg" else (0, 0, 255), 2)
-
-        out.write(resized)
-        cv2.imshow("Detection", resized)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
-    print("Video saved.")
-
-# --- Run the script ---
 if __name__ == "__main__":
-    input_video = "egg_test_video.mp4" 
-    output_video = "final_detected_eggs_labeled.mp4"
-    process_video(input_video, output_video)
-
-
-
-
-
-
-
-
-
-
+    main()
 
