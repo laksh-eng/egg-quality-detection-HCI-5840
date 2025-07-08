@@ -58,10 +58,14 @@ def process_video(input_path, output_path):
 
         label = classify_by_kmeans_color(roi)
 
-        # Draw ROI bounding box
-        cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(resized, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
-                    (0, 255, 0) if label == "Good Egg" else (0, 0, 255), 2)
+        # Only draw bounding box and label if it's not "No Egg"
+        if label != "No Egg":
+            cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(resized, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                (0, 255, 0) if label == "Good Egg" else (0, 0, 255), 2)
+
+
+        
 
         out.write(resized)
         cv2.imshow("Detection", resized)
