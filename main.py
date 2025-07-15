@@ -21,9 +21,9 @@ def classify_by_kmeans_color(region):
 
 
     # Prioritizes "Bad Egg" classification first, then "Good Egg", then "Uncertain".
-    if 17 <= h <= 23 and 75 <= s <= 140 and 105 <= v <= 210:
+    if h > 50 and s >= 20 and v >=  140: 
         return "Bad Egg"
-    elif 18 <= h <= 35 and 40 <= s <= 90 and 120 <= v <= 255:
+    elif 44 <= h <= 50 and 20 <= s <= 28 and 140 <= v <= 170:
         return "Good Egg"
     else:
         return "Uncertain"
@@ -43,6 +43,11 @@ def process_video(input_path, output_path):
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     print(f" Processing video and saving to: {output_path}")
+# For flicker protection
+    current_label = None
+    consistent_count = 0
+    threshold = 10  # Number of frames before accepting new label
+    final_label = "No Egg"
 
     while True:
         ret, frame = cap.read()
@@ -53,15 +58,32 @@ def process_video(input_path, output_path):
         resized = cv2.resize(frame, (width, height))
 
         # Fixed ROI 
-        x1, y1, x2, y2 = 180, 200, 460, 400
+        box_w, box_h = 400, 400
+        x1 = width // 2 - box_w // 2
+        y1 = height // 2 - box_h // 2
+        x2 = x1 + box_w
+        y2 = y1 + box_h
         roi = resized[y1:y2, x1:x2]
 
-        label = classify_by_kmeans_color(roi)
+        detected_label = classify_by_kmeans_color(roi)
 
-        # Draw ROI bounding box
-        cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(resized, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
-                    (0, 255, 0) if label == "Good Egg" else (0, 0, 255), 2)
+        if detected_label == current_label:
+            consistent_count += 1
+        else:
+            consistent_count = 0
+            current_label = detected_label
+
+        if consistent_count >= threshold:
+            final_label = current_label
+
+        # Only draw bounding box and label if it's not "No Egg"
+        if final_label != "No Egg":
+            cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 4)
+            cv2.putText(resized, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                (0, 255, 0) if final_label == "Good Egg" else (0, 0, 255), 2)
+
+
+        
 
         out.write(resized)
         cv2.imshow("Detection", resized)
@@ -75,7 +97,7 @@ def process_video(input_path, output_path):
 
 # Run the script
 if __name__ == "__main__":
-    input_video = "egg_test_video.mp4" 
+    input_video = "input_video.mp4" 
     output_video = "final_detected_eggs_labeled.mp4"
     process_video(input_video, output_video)
 
