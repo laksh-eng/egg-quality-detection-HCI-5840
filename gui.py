@@ -4,7 +4,7 @@ from classify import classify_by_kmeans_color
 import cv2
 import os
 
-def process_video_with_gui(input_path):
+def process_video_with_gui(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
         messagebox.showerror("Error", "Could not open video.")
@@ -15,7 +15,6 @@ def process_video_with_gui(input_path):
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    output_path = "outputs/gui_detected_output.mp4"
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     label_result["text"] = f"Processing {os.path.basename(input_path)}..."
@@ -64,13 +63,23 @@ def process_video_with_gui(input_path):
     cap.release()
     out.release()
     cv2.destroyAllWindows()
-    label_result["text"] = "Done. Video saved to outputs/."
+    label_result["text"] = "Done. Video saved."
     messagebox.showinfo("Complete", f"Processed and saved output to:\n{output_path}")
 
 def select_video():
-    filepath = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")])
+    filepath = filedialog.askopenfilename(
+        initialdir="/Users/lakshmi/Desktop",
+        filetypes=[("MP4 files", "*.mp4")]
+    )
     if filepath:
-        process_video_with_gui(filepath)
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".mp4",
+            filetypes=[("MP4 files", "*.mp4")],
+            initialfile="gui_detected_output.mp4",
+            title="Select Output Video Location"
+        )
+        if output_path:
+            process_video_with_gui(filepath, output_path)
 
 # Create GUI Window
 root = tk.Tk()
@@ -89,3 +98,4 @@ btn_quit = tk.Button(root, text="Quit", command=root.destroy)
 btn_quit.pack(pady=10)
 
 root.mainloop()
+
