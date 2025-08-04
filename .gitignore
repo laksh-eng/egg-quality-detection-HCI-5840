@@ -1,33 +1,24 @@
-# Mac OS system files
+# OS and editor junk
 .DS_Store
-
-# Python cache files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# VS Code settings (optional if you're using VS Code)
-.vscode/
-
-# Virtual environment folders
-venv/
-env/
-
-# Output files (videos, CSVs, images)
-*.mp4
-*.csv
-outputs/
-
-# Jupyter Notebook checkpoints (if you use Jupyter, optional)
-.ipynb_checkpoints/
-
-# OS Trash files
 *.swp
-Thumbs.db
-ehthumbs.db
-Icon?
+*.bak
 
-# Logs
-*.log
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env/
+
+# Output files
+*.mp4
+*.avi
+outputs/
+old/
+
+# Notebooks or large test images
+*.ipynb
+test images/
+
 
