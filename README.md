@@ -2,6 +2,16 @@
 
 A computer vision-based tool that detects and classifies egg quality from videos using HSV color clustering, and estimates egg size from static images using ellipse fitting.
 
+## Overview
+This project provides two core tools for automated egg quality detection:
+- **Image-based egg size estimation** from photos.
+- **Video-based egg classification** using HSV color clustering and a Tkinter GUI.
+
+## Features
+- Estimate egg size from still images (`egg_size_estimator.py`)
+- Classify eggs as Good/Bad from videos (`classify.py` + `gui.py`)
+- Easy GUI interface for video selection and output
+
 ## Installation
 
 1. Make sure you have Python 3.8 or later installed.
@@ -38,13 +48,14 @@ A computer vision-based tool that detects and classifies egg quality from videos
     ```
 3. The script fits an ellipse and displays the estimated major/minor axis of each egg.
 
----
 
-##  Screenshots (Optional)
 
-![screenshot](images/gui_example.png)
+##  Screenshots 
 
----
+
+
+
+
 
 ## Common Issues
 
