@@ -15,7 +15,7 @@ This project provides two core tools for automated egg quality detection:
 ## Installation
 
 1. Make sure you have Python 3.8 or later installed.
-2. (Optional) Create and activate a virtual environment:
+2.  Create and activate a virtual environment:
     ```bash
     python3 -m venv venv
     source venv/bin/activate
@@ -53,8 +53,10 @@ This project provides two core tools for automated egg quality detection:
 ##  Screenshots 
 
 
-
-
+<img width="1470" height="956" alt="Screenshot 2025-08-04 at 11 39 38 AM" src="https://github.com/user-attachments/assets/0adf2465-c424-4df6-aaac-bee6bd61c86d" />
+<img width="1470" height="956" alt="Screenshot 2025-08-04 at 11 38 59 AM" src="https://github.com/user-attachments/assets/d5bd12c6-e27b-482e-a407-bcdd3350ec98" />
+<img width="1470" height="956" alt="Screenshot 2025-08-04 at 11 38 51 AM" src="https://github.com/user-attachments/assets/255b8596-62d4-4aa4-8bc8-0a080ae421a2" />
+<img width="1470" height="956" alt="Screenshot 2025-08-04 at 11 38 41 AM" src="https://github.com/user-attachments/assets/3fc1f14b-3ec1-49d7-8385-a2794b710b60" />
 
 
 ## Common Issues
