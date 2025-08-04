@@ -3,6 +3,12 @@ from tkinter import filedialog, messagebox
 from classify import classify_by_kmeans_color
 import cv2
 import os
+import pandas as pd
+from datetime import timedelta
+
+# Create output directories if they don't exist
+os.makedirs("imgs", exist_ok=True)
+os.makedirs("output_data", exist_ok=True)
 
 #runs egg classification on the selected video.
 def process_video_with_gui(input_path, output_path):
@@ -34,6 +40,10 @@ def process_video_with_gui(input_path, output_path):
     consistent_count = 0
     threshold = 10
     final_label = "No Egg"
+
+    egg_data = []
+    frame_number = 0
+    image_count = 1
 
     #Loops over every frame in the video.
     while True:
@@ -70,6 +80,19 @@ def process_video_with_gui(input_path, output_path):
             cv2.rectangle(resized, (x1, y1), (x2, y2), (0, 255, 0), 4)
             cv2.putText(resized, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
                         (0, 255, 0) if final_label == "Good Egg" else (0, 0, 255), 2)
+            
+            img_filename = f"{image_count}.jpg"
+            cv2.imwrite(os.path.join("imgs", img_filename), resized)
+
+            timestamp = str(timedelta(seconds=frame_number / fps))
+            egg_data.append({
+                "frame": frame_number,
+                "time": timestamp,
+                "label": final_label,
+                "filename": img_filename
+            })
+
+            image_count += 1
 
         # Write and show the frame
         out.write(resized)
@@ -77,9 +100,15 @@ def process_video_with_gui(input_path, output_path):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+        frame_number += 1
+
     cap.release()
     out.release()
     cv2.destroyAllWindows()
+
+    df = pd.DataFrame(egg_data)
+    df.to_csv("output_data/egg_log.csv", index=False)
+    
     label_result["text"] = "Done. Video saved."
     messagebox.showinfo("Complete", f"Processed and saved output to:\n{output_path}")
 
