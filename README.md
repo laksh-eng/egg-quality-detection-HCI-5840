@@ -63,10 +63,10 @@ This project provides two core tools for automated egg quality detection:
 
 ## Common Issues
 
-| Issue | Solution |
-| `No module named _tkinter` | Ensure Python was installed with Tk support (`brew install python-tk`) |
-| `File not found: input_video.mp4` | Make sure the video file is inside the `input video/` folder or update the path |
-| GUI window doesn't show anything | Press `q` to quit the video window once done |
+| Issue - Solution |
+1. `No module named _tkinter` - Ensure Python was installed with Tk support (`brew install python-tk`)
+2. `File not found: input_video.mp4` - Make sure the video file is inside the `input video/` folder or update the path
+3. GUI window doesn't show anything - Press `q` to quit the video window once done 
 
 ---
 
