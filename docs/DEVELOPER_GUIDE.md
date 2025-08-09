@@ -84,10 +84,10 @@ DEVELOPER_GUIDE.md   - This document
 
 ## Known Issues
 
-| Severity | Description |
-| Minor    | GUI window might freeze on very large videos |
-| Minor    | No automatic light adjustment — thresholds are sensitive to lighting |
-| Minor    | Assumes centered egg only; off-center eggs may not be classified |
+ Severity - Description 
+a) Minor   - GUI window might freeze on very large videos 
+b) Minor   - No automatic light adjustment — thresholds are sensitive to lighting 
+c) Minor    - Assumes centered egg only; off-center eggs may not be classified 
 
 ## Suggested Improvements (Future Work)
 
